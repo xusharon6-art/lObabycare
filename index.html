@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DevTracker Pro v2.1 - 婴幼儿发展曲线与家庭环境评估" />
+  <meta name="author" content="Sharon Xu" />
+  <title>DevTracker Pro v2.1 · 评估与曲线</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="assets/icons/favicon.png" type="image/png" />
+  <meta property="og:title" content="DevTracker Pro v2.1" />
+  <meta property="og:description" content="婴幼儿发展曲线生成与家庭环境评估（GitHub Pages 即开即用）" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/images/preview.png" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-top">
+      <div class="brand">
+        <img src="assets/icons/favicon.png" alt="" class="logo"/>
+        <span>DevTracker Pro v2.1</span>
+      </div>
+      <div class="toolbar">
+        <button id="btn-theme" class="btn secondary">🌗 主题</button>
+        <button id="btn-reset-all" class="btn danger">🗑 重置数据</button>
+        <button id="btn-print" class="btn">🖨 打印报告</button>
+      </div>
+    </div>
+    <p class="tagline">婴幼儿发展曲线生成 · 家庭环境评估 · 本地存储 · GitHub Pages 即开即用</p>
+    <nav class="tabs">
+      <button class="tab active" data-target="#overview">概览</button>
+      <button class="tab" data-target="#growth">发育曲线生成</button>
+      <button class="tab" data-target="#family">家庭环境评估</button>
+      <button class="tab" data-target="#export">数据导入导出</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="overview" class="section visible">
+      <div class="panel">
+        <div class="panel-header">功能一览</div>
+        <ul class="bullets">
+          <li>📈 6/12/18/24/30/36 月龄 × 8 维度录入，自动生成折线 + 雷达图</li>
+          <li>🎯 参考带（默认/偏高/偏低 + 自定义容差），直观对比个体与参考</li>
+          <li>🏠 家庭环境评估（4 维度 × 16 题），输出水平判定与建议</li>
+          <li>💾 本地存储（localStorage）、JSON 导入/导出</li>
+          <li>🌗 明暗主题切换、🗑 一键重置、🖨 一键打印报告</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-header">快速开始</div>
+        <ol class="bullets">
+          <li>前往“发育曲线生成”，录入或“填充示例数据”观察效果；</li>
+          <li>前往“家庭环境评估”，完成 16 题后查看报告与建议；</li>
+          <li>在“数据导入导出”中保存、读取或导出 JSON；</li>
+          <li>使用顶部工具栏切换主题、重置数据或打印报告。</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="growth" class="section">
+      <h2>发育曲线生成</h2>
+      <div class="panel">
+        <div class="panel-header">1) 录入评估值（0–100）</div>
+        <div class="grid grid-2">
+          <div>
+            <label>月龄节点（固定）</label>
+            <div class="chips">6 · 12 · 18 · 24 · 30 · 36</div>
+            <p class="muted">说明：右侧表格为八个维度在六个节点的得分；可根据你的实际量表换算为 0–100 量纲。</p>
+          </div>
+          <div class="actions-right">
+            <button id="btn-fill-demo" class="btn secondary">填充示例数据</button>
+            <button id="btn-clear-scores" class="btn danger">清空录入</button>
+          </div>
+        </div>
+        <div id="scores-table"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">2) 参考标准设置（百分位带）</div>
+        <div class="grid grid-3">
+          <div>
+            <label>选用参考</label>
+            <select id="ref-preset">
+              <option value="default">系统默认（P50）</option>
+              <option value="high">较高参考（P60–P70）</option>
+              <option value="low">较低参考（P30–P40）</option>
+            </select>
+          </div>
+          <div>
+            <label>上下容差（±）</label>
+            <input id="ref-band" type="number" min="0" max="30" value="10"/>
+          </div>
+          <div class="actions-right">
+            <button id="btn-apply-ref" class="btn">应用参考带</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">3) 可视化</div>
+        <div class="grid grid-2">
+          <div>
+            <canvas id="lineChart" height="240"></canvas>
+          </div>
+          <div>
+            <canvas id="radarChart" height="240"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="family" class="section">
+      <h2>家庭环境评估</h2>
+      <p class="muted">简版 16 题（Likert 1–5）：学习资源、互动质量、安全与规律、数字暴露 四维度，每题 1–5 分。</p>
+      <form id="family-form" class="panel">
+        <div id="family-questions"></div>
+        <div class="actions-right">
+          <button type="button" id="btn-family-clear" class="btn danger">清空</button>
+          <button type="submit" class="btn">计算评分</button>
+        </div>
+      </form>
+      <div id="family-result" class="panel" style="display:none;"></div>
+    </section>
+
+    <section id="export" class="section">
+      <h2>数据导入导出</h2>
+      <div class="panel">
+        <div class="grid grid-2">
+          <div>
+            <button id="btn-save-local" class="btn">保存到本地浏览器</button>
+            <button id="btn-load-local" class="btn secondary">从本地读取</button>
+          </div>
+          <div class="actions-right">
+            <button id="btn-export-json" class="btn">导出 JSON 文件</button>
+            <label class="btn secondary">
+              导入 JSON
+              <input id="import-json" type="file" accept="application/json" style="display:none;">
+            </label>
+          </div>
+        </div>
+        <pre id="export-preview" class="code"></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Sharon Xu | DevTracker Pro v2.1 | GitHub Pages Ready</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
